@@ -100,7 +100,7 @@ public class InitServer{
         }
     }
 
-//    public static void main(String[] args) {
-//        new InitServer();
-//    }
+    public static void main(String[] args) {
+        new InitServer();
+    }
 }

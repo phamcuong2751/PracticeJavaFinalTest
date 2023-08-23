@@ -20,17 +20,33 @@ import java.util.Vector;
  * Description: ...
  */
 public class ServerData implements Runnable {
-    private Socket socket;
-    private ArrayList<Socket> listClient;
-    private Vector<String> nameClient;
-    private Map<String, Socket> map;
+    private final Socket socket;
+    private final ArrayList<Socket> listClient;
+    private final Vector<String> nameClient;
+    private final Map<String, Socket> map;
 
-    public ServerData(Socket s, ArrayList<Socket> listClient, Vector<String> nameClient,
-                      Map<String, Socket> map) {
+    public ServerData(Socket s, ArrayList<Socket> listClient, Vector<String> nameClient, Map<String, Socket> map) {
         this.socket = s;
         this.listClient = listClient;
         this.nameClient = nameClient;
         this.map = map;
+    }
+
+    // gửi tin nhắn đến tất cả client
+    public static void sendAClient(Socket s, Object message, String info, String name) throws IOException {
+        String messages = info + "." + message + "." + name;
+        PrintWriter pwOut = new PrintWriter(s.getOutputStream(), true);
+        pwOut.println(messages);
+    }
+
+    // gửi tin nhắn đến cho 1 client
+    public static void sendAllClient(ArrayList<Socket> listClient, Object message, String info, String name) throws IOException {
+        String messages = info + "." + message + "." + name;
+        PrintWriter pwOut = null;
+        for (Socket s : listClient) { // gửi tin nhắn cho từng client cần thiết
+            pwOut = new PrintWriter(s.getOutputStream(), true);
+            pwOut.println(messages);
+        }
     }
 
     public void run() {
@@ -47,7 +63,7 @@ public class ServerData implements Runnable {
                 DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                 Date date = new Date();
 
-               if (infoMode.equals("1")) { // 1 connect
+                if (infoMode.equals("1")) { // 1 connect
                     if (!nameClient.contains(name)) {
                         // add name client
                         nameClient.add(name);
@@ -59,9 +75,9 @@ public class ServerData implements Runnable {
                         DashboardServer.addRowToJTable(path, "Connected", name, message);
 
                         // ghi vào file logs
-                        String data = "{" + (DashboardServer.tableModel.getRowCount() + 1) + "," + path + "," + dateFormat.format(date).toString() + "," + "Connected" + "," + name + "," + message + "}";
+                        String data = "{" + (DashboardServer.tableModel.getRowCount() + 1) + "," + path + "," + dateFormat.format(date) + "," + "Connected" + "," + name + "," + message + "}";
                         WriteLogs wr = new WriteLogs();
-                        wr.writeFile(String.valueOf(data), DashboardServer.path);
+                        wr.writeFile(data, DashboardServer.path);
 
                         sendAClient(socket, message, "1", name);
                     } else {
@@ -79,58 +95,41 @@ public class ServerData implements Runnable {
                     DashboardServer.jListClients.setListData(nameClient);
 
                     // thêm vào table
-                   DashboardServer.addRowToJTable(path, "Disconnected", name, message);
+                    DashboardServer.addRowToJTable(path, "Disconnected", name, message);
 
                     // ghi vào file logs
-                    String data = "{" + (DashboardServer.tableModel.getRowCount() + 1) + "," + path + "," + dateFormat.format(date).toString() + "," + "Disconnected" + "," + name + "," + message + "}";
+                    String data = "{" + (DashboardServer.tableModel.getRowCount() + 1) + "," + path + "," + dateFormat.format(date) + "," + "Disconnected" + "," + name + "," + message + "}";
                     WriteLogs wr = new WriteLogs();
-                    wr.writeFile(String.valueOf(data), DashboardServer.path);
+                    wr.writeFile(data, DashboardServer.path);
 
                     sendAClient(socket, nameClient, "2", name);
                     socket.close(); // close socket
                     break;
                 } else if (infoMode.equals("10")) { // created
-                   DashboardServer.addRowToJTable(path, "Created", name, message);
+                    DashboardServer.addRowToJTable(path, "Created", name, message);
 
                     // ghi vào file logs
-                    String data = "{" + (DashboardServer.tableModel.getRowCount() + 1) + "," + path + "," + dateFormat.format(date).toString() + "," + "Created" + "," + name + "," + message + "}";
+                    String data = "{" + (DashboardServer.tableModel.getRowCount() + 1) + "," + path + "," + dateFormat.format(date) + "," + "Created" + "," + name + "," + message + "}";
                     WriteLogs wr = new WriteLogs();
-                    wr.writeFile(String.valueOf(data), DashboardServer.path);
+                    wr.writeFile(data, DashboardServer.path);
                 } else if (infoMode.equals("11")) { // deleted
-                   DashboardServer.addRowToJTable(path, "Deleted", name, message);
+                    DashboardServer.addRowToJTable(path, "Deleted", name, message);
 
                     // ghi vào file logs
-                    String data = "{" + (DashboardServer.tableModel.getRowCount() + 1) + "," + path + "," + dateFormat.format(date).toString() + "," + "Deleted" + "," + name + "," + message + "}";
+                    String data = "{" + (DashboardServer.tableModel.getRowCount() + 1) + "," + path + "," + dateFormat.format(date) + "," + "Deleted" + "," + name + "," + message + "}";
                     WriteLogs wr = new WriteLogs();
-                    wr.writeFile(String.valueOf(data), DashboardServer.path);
+                    wr.writeFile(data, DashboardServer.path);
                 } else if (infoMode.equals("12")) { // modified
-                   DashboardServer.addRowToJTable(path, "Modified", name, message);
+                    DashboardServer.addRowToJTable(path, "Modified", name, message);
 
                     // ghi vào file logs
-                    String data = "{" + (DashboardServer.tableModel.getRowCount() + 1) + "," + path + "," + dateFormat.format(date).toString() + "," + "Modified" + "," + name + "," + message + "}";
+                    String data = "{" + (DashboardServer.tableModel.getRowCount() + 1) + "," + path + "," + dateFormat.format(date) + "," + "Modified" + "," + name + "," + message + "}";
                     WriteLogs wr = new WriteLogs();
-                    wr.writeFile(String.valueOf(data), DashboardServer.path);
+                    wr.writeFile(data, DashboardServer.path);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    // gửi tin nhắn đến tất cả client
-    public static void sendAClient(Socket s, Object message, String info, String name) throws IOException {
-        String messages = info + "." + message + "." + name;
-        PrintWriter pwOut = new PrintWriter(s.getOutputStream(), true);
-        pwOut.println(messages);
-    }
-
-    // gửi tin nhắn đến cho 1 client
-    public static void sendAllClient(ArrayList<Socket> listClient, Object message, String info, String name) throws IOException {
-        String messages = info + "." + message + "." + name;
-        PrintWriter pwOut = null;
-        for (Socket s : listClient) { // gửi tin nhắn cho từng client cần thiết
-            pwOut = new PrintWriter(s.getOutputStream(), true);
-            pwOut.println(messages);
         }
     }
 

@@ -94,4 +94,8 @@ public class InitClient {
 
         window.setVisible(true);
     }
+
+    public static void main(String[] args) {
+        new InitClient();
+    }
 }
