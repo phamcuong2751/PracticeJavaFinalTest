@@ -124,4 +124,11 @@ public class URLDownloaderApp extends JFrame {
 
         linksArea.setText(linksText.toString());
     }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            URLDownloaderApp app = new URLDownloaderApp();
+            app.setVisible(true);
+        });
+    }
 }
